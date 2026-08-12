@@ -1,4 +1,4 @@
-# Pipeline AI — Integrations Technical Assessment
+# Pipeline AI  Integrations Technical Assessment
 
 HubSpot OAuth 2.0 integration (Part 1) and CRM item loading (Part 2), built alongside
 the provided Airtable and Notion integrations.
