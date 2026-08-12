@@ -93,7 +93,7 @@ The resulting `IntegrationItem` list is:
 
 ## What was implemented
 
-### Part 1 — HubSpot OAuth (`backend/integrations/hubspot.py`)
+### Part 1 - HubSpot OAuth (`backend/integrations/hubspot.py`)
 
 | Function | Behaviour |
 | --- | --- |
@@ -131,7 +131,7 @@ and maps each record onto an `IntegrationItem`:
 | `visibility` | `false` for archived records |
 
 Structure: a flat list of one **collection** item per object type, each followed by its
-records — the same base/table parent-child shape the Airtable integration uses.
+records - the same base/table parent-child shape the Airtable integration uses.
 
 Handling:
 - **Pagination** via the `paging.next.after` cursor (`limit=100`, capped at 10 pages per
@@ -186,7 +186,7 @@ The brief allows modifying provided files. Beyond adding HubSpot:
 
 Two layers of testing were done, both against the unmodified submission code:
 
-**1. Offline / mocked** — Redis and HubSpot's API replaced with fakes so the suite runs
+**1. Offline / mocked** - Redis and HubSpot's API replaced with fakes so the suite runs
 without any live credentials:
 
 - `authorize_hubspot` produces a well-formed consent URL with the correct host, path,
