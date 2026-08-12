@@ -1,0 +1,44 @@
+[
+  {
+    "step": "App loads",
+    "pass": true
+  },
+  {
+    "step": "User/Org fields fillable",
+    "pass": true
+  },
+  {
+    "step": "HubSpot selectable in Integration Type dropdown",
+    "pass": true
+  },
+  {
+    "step": "Connect click opens OAuth popup pointed at the (mock) HubSpot authorize URL",
+    "pass": true
+  },
+  {
+    "step": "Popup closes itself after the callback runs (window.close())",
+    "pass": true
+  },
+  {
+    "step": "Main window detects popup close and shows \"HubSpot Connected\"",
+    "pass": true
+  },
+  {
+    "step": "Loaded table contains contacts, companies and deals from the mock CRM",
+    "pass": true,
+    "detail": "Contact CollectionContacts——— | ContactAda LovelaceContacts01/06/2024, 17:00:00Open | ContactGrace HopperContacts02/06/2024, 14:30:00Open | Company CollectionCompanies——— | CompanyPipeline AICompanies01/05/2024, 14:30:00Open | Deal CollectionDeals——— | DealEnterprise RolloutDeals01/05/2024, 13:30:00Open | DealPilot ProgramDeals15/05/2024, 13:30:00Open"
+  },
+  {
+    "step": "Directory/collection items rendered for each object type",
+    "pass": true
+  },
+  {
+    "step": "Record deep-links (url field) rendered",
+    "pass": true,
+    "detail": "5 links"
+  },
+  {
+    "step": "Clear Data resets the view",
+    "pass": true
+  }
+]
