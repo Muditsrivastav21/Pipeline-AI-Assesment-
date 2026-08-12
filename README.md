@@ -3,6 +3,9 @@
 HubSpot OAuth 2.0 integration (Part 1) and CRM item loading (Part 2), built alongside
 the provided Airtable and Notion integrations.
 
+See [ARCHITECTURE.md](ARCHITECTURE.md) for system diagrams (OAuth sequence, data
+flow, code layout, and data model).
+
 ---
 
 ## Quick start
