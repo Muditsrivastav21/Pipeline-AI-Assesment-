@@ -19,3 +19,8 @@ dump.rdb
 
 # OS
 .DS_Store
+
+# Local-only docs / verification harness (not part of the submission)
+ARCHITECTURE.md
+SUBMISSION.md
+e2e/

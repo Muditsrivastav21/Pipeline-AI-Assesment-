@@ -1,18 +1,8 @@
 # hubspot.py
-
-"""HubSpot OAuth 2.0 integration.
-
-Flow mirrors the Airtable/Notion integrations:
-
-    authorize_hubspot          -> builds the consent URL, stashes CSRF state in Redis
-    oauth2callback_hubspot     -> validates state, exchanges the code for tokens
-    get_hubspot_credentials    -> pops the stored credentials for the frontend
-    get_items_hubspot          -> reads CRM objects and maps them to IntegrationItems
-
-Unlike the provided integrations this module uses `httpx.AsyncClient` for every
-outbound call so the FastAPI event loop is never blocked, and it fans the three
-CRM object types out concurrently.
-"""
+#
+# Same authorize -> callback -> credentials -> load pattern as airtable.py /
+# notion.py. Uses httpx.AsyncClient instead of requests so nothing blocks the
+# event loop, and get_items_hubspot fetches all three CRM object types at once.
 
 import asyncio
 import base64
