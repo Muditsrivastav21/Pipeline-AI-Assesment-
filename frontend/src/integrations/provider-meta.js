@@ -1,20 +1,22 @@
-// Visual identity for each provider's card/button. Uses each brand's public
-// color (not their logo asset) plus a monogram, so no third-party artwork
-// needs to be bundled or licensed.
+import airtableLogo from '../assets/logos/airtable.svg';
+import hubspotLogo from '../assets/logos/hubspot.svg';
+import notionLogo from '../assets/logos/notion.svg';
+
+// Visual identity for each provider's card/button.
 export const PROVIDER_META = {
     HubSpot: {
         color: '#FF7A59',
-        monogram: 'H',
+        logo: hubspotLogo,
         description: 'Sync contacts, companies, and deals from your CRM.',
     },
     Airtable: {
         color: '#2D7FF9',
-        monogram: 'A',
+        logo: airtableLogo,
         description: 'Pull records from your bases and tables.',
     },
     Notion: {
         color: '#1A1A1A',
-        monogram: 'N',
+        logo: notionLogo,
         description: 'Import pages and databases from your workspace.',
     },
 };

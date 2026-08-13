@@ -4,7 +4,7 @@ import CheckCircleRoundedIcon from '@mui/icons-material/CheckCircleRounded';
 import { PROVIDER_META } from '../integrations/provider-meta';
 
 export const ProviderCard = ({ name, selected, onSelect }) => {
-    const meta = PROVIDER_META[name] || { color: '#666', monogram: name?.[0] || '?', description: '' };
+    const meta = PROVIDER_META[name] || { color: '#666', description: '' };
 
     return (
         <Card
@@ -26,22 +26,19 @@ export const ProviderCard = ({ name, selected, onSelect }) => {
                     />
                 )}
                 <Box
+                    component="img"
+                    src={meta.logo}
+                    alt={`${name} logo`}
                     sx={{
                         width: 40,
                         height: 40,
                         borderRadius: '10px',
                         mb: 1.5,
-                        bgcolor: meta.color,
-                        color: '#fff',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        fontWeight: 800,
-                        fontSize: 16,
+                        display: 'block',
+                        border: '1px solid',
+                        borderColor: 'divider',
                     }}
-                >
-                    {meta.monogram}
-                </Box>
+                />
                 <Typography variant="subtitle1">{name}</Typography>
                 <Typography variant="body2" color="text.secondary">
                     {meta.description}

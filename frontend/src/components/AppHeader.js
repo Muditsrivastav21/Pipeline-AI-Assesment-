@@ -2,6 +2,8 @@ import { AppBar, Box, Toolbar, Tooltip, Switch, Typography } from '@mui/material
 import LightModeRoundedIcon from '@mui/icons-material/LightModeRounded';
 import DarkModeRoundedIcon from '@mui/icons-material/DarkModeRounded';
 
+import pipelineLogo from '../assets/logos/pipeline.svg';
+
 export const AppHeader = ({ mode, onToggleMode }) => (
     <AppBar
         position="static"
@@ -11,23 +13,11 @@ export const AppHeader = ({ mode, onToggleMode }) => (
     >
         <Toolbar sx={{ maxWidth: 900, mx: 'auto', width: '100%', px: { xs: 1, sm: 2 } }}>
             <Box
-                sx={{
-                    width: 36,
-                    height: 36,
-                    borderRadius: '10px',
-                    mr: 1.5,
-                    flexShrink: 0,
-                    background: 'linear-gradient(135deg, #6C5CE7 0%, #00B8A9 100%)',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    color: '#fff',
-                    fontWeight: 800,
-                    fontSize: 18,
-                }}
-            >
-                P
-            </Box>
+                component="img"
+                src={pipelineLogo}
+                alt="Pipeline AI"
+                sx={{ width: 36, height: 36, borderRadius: '10px', mr: 1.5, flexShrink: 0 }}
+            />
             <Box sx={{ flexGrow: 1, minWidth: 0 }}>
                 <Typography variant="h6" noWrap sx={{ lineHeight: 1.15 }}>
                     Pipeline AI

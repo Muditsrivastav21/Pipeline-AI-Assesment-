@@ -136,7 +136,18 @@ export const IntegrationConnect = ({
                     variant="contained"
                     onClick={isConnected ? () => {} : handleConnectClick}
                     disabled={isConnecting}
-                    startIcon={isConnected ? <CheckCircleRoundedIcon /> : null}
+                    startIcon={
+                        isConnected ? (
+                            <CheckCircleRoundedIcon />
+                        ) : meta.logo && !isConnecting ? (
+                            <Box
+                                component="img"
+                                src={meta.logo}
+                                alt=""
+                                sx={{ width: 18, height: 18, borderRadius: '4px' }}
+                            />
+                        ) : null
+                    }
                     sx={{
                         pointerEvents: isConnected ? 'none' : 'auto',
                         cursor: isConnected ? 'default' : 'pointer',

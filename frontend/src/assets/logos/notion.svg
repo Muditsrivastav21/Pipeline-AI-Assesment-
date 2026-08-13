@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64" role="img" aria-label="Notion">
+  <rect x="4" y="4" width="56" height="56" rx="12" fill="#111111"/>
+  <path d="M9 11 L46 8 C49 7.7 51 9.7 51 12.5 L51 50 C51 52.8 49 54.8 46.2 55 L12 57.5 C9.2 57.7 7 55.5 7 52.7 L7 15.5 C7 13 8 11.3 9 11 Z" fill="#FFFFFF"/>
+  <text x="29" y="41" font-family="Georgia, 'Times New Roman', serif" font-size="30" font-weight="700" fill="#111111" text-anchor="middle">N</text>
+</svg>
