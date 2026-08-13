@@ -4,7 +4,8 @@ HubSpot OAuth 2.0 integration (Part 1) and CRM item loading (Part 2), built alon
 the provided Airtable and Notion integrations.
 
 See [ARCHITECTURE.md](ARCHITECTURE.md) for system diagrams (OAuth sequence, data
-flow, code layout, and data model).
+flow, code layout, and data model), and [SUBMISSION.md](SUBMISSION.md) for the
+implementation write-up and screen-recording script.
 
 ---
 
@@ -187,22 +188,33 @@ The brief allows modifying provided files. Beyond adding HubSpot:
 
 ## Verification
 
-Two layers of testing were done, both against the unmodified submission code:
+### Automated tests
 
-**1. Offline / mocked** - Redis and HubSpot's API replaced with fakes so the suite runs
-without any live credentials:
+```bash
+cd backend
+pip install -r requirements-test.txt
+pytest tests/test_hubspot.py -v
+```
 
-- `authorize_hubspot` produces a well-formed consent URL with the correct host, path,
-  redirect URI, scopes and state; state is persisted to Redis.
-- `oauth2callback_hubspot` rejects a tampered `state` (`400 State does not match.`) and
-  missing `code`.
-- `get_items_hubspot` follows the pagination cursor, applies all three name fallbacks,
-  builds correct record URLs, and marks collection items as directories.
-- A `403` on one object type degrades gracefully; a `401` surfaces as an HTTP error.
-- Through the real FastAPI stack: `/authorize`, `/credentials` (including single-use
-  semantics and the `400` empty case) and `/load` return correct JSON.
+18 unit tests in `backend/tests/test_hubspot.py`, run entirely offline (Redis and
+HubSpot's HTTP API are both faked, no credentials or network needed):
+
+| Area | Covered by |
+| --- | --- |
+| `authorize_hubspot` | Consent URL has the right host/scopes/state; PKCE `code_challenge` really is `SHA256(code_verifier)`; missing `CLIENT_ID` raises `500`. |
+| `oauth2callback_hubspot` | Missing `code`/`state` → `400`; provider `error` param surfaces; tampered/unknown `state` → `400 State does not match.`; a successful exchange stores tokens in Redis and consumes the state (single use); a failed exchange propagates HubSpot's status code. |
+| `get_hubspot_credentials` | Single-use retrieval (second call → `400`); missing credentials → `400`. |
+| Item mapping | Contact name fallback chain (full name → email → placeholder); company name falls back to domain; archived records get `visibility=False`; directory items report the correct child count. |
+| `get_items_hubspot` | Multi-page pagination is followed to completion; all three object types are aggregated with correct parent/child structure and hub-id-based deep links; a `403` on one object type degrades to an empty collection instead of failing the whole load; a `401` raises; a request with no `access_token` is rejected before any HTTP call is made. |
+
+### Two layers of end-to-end testing were also done, both against the unmodified submission code:
+
+**1. Offline / mocked E2E** — Redis and HubSpot's API replaced with fakes:
+
 - 10/10 Playwright E2E checks (browser → popup consent → connected state → loaded
   table → clear) against a protocol-faithful mock HubSpot server.
+- Through the real FastAPI stack: `/authorize`, `/credentials` (including single-use
+  semantics and the `400` empty case) and `/load` return correct JSON.
 
 **2. Live end-to-end** — a real HubSpot Projects app (private distribution, OAuth 2.1 +
 PKCE) was created, its Client ID/Secret placed in `backend/.env`, and the full flow
