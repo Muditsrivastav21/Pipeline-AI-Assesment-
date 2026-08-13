@@ -1,10 +1,12 @@
 // integration-connect.js
 
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { Box, Button, CircularProgress } from '@mui/material';
+import { Alert, Box, Button, CircularProgress, Snackbar, Typography } from '@mui/material';
+import CheckCircleRoundedIcon from '@mui/icons-material/CheckCircleRounded';
 import axios from 'axios';
 
 import { API_BASE_URL, INTEGRATION_ENDPOINTS } from '../config';
+import { PROVIDER_META } from './provider-meta';
 
 /**
  * Shared OAuth "Connect" button.
@@ -26,9 +28,11 @@ export const IntegrationConnect = ({
 }) => {
     const [isConnected, setIsConnected] = useState(false);
     const [isConnecting, setIsConnecting] = useState(false);
+    const [notice, setNotice] = useState(null); // { message, severity }
     const pollTimerRef = useRef(null);
 
     const endpoint = INTEGRATION_ENDPOINTS[integrationType];
+    const meta = PROVIDER_META[integrationType] || {};
 
     const clearPollTimer = useCallback(() => {
         if (pollTimerRef.current) {
@@ -57,10 +61,12 @@ export const IntegrationConnect = ({
                 }));
             }
         } catch (e) {
-            alert(
-                e?.response?.data?.detail ||
-                    `Could not retrieve ${integrationType} credentials.`
-            );
+            setNotice({
+                message:
+                    e?.response?.data?.detail ||
+                    `Could not retrieve ${integrationType} credentials.`,
+                severity: 'error',
+            });
         } finally {
             setIsConnecting(false);
         }
@@ -90,7 +96,10 @@ export const IntegrationConnect = ({
             // immediately request credentials that do not exist yet.
             if (!newWindow) {
                 setIsConnecting(false);
-                alert('Popup blocked. Please allow popups for this site and retry.');
+                setNotice({
+                    message: 'Popup blocked. Please allow popups for this site and retry.',
+                    severity: 'warning',
+                });
                 return;
             }
 
@@ -103,10 +112,12 @@ export const IntegrationConnect = ({
             }, 200);
         } catch (e) {
             setIsConnecting(false);
-            alert(
-                e?.response?.data?.detail ||
-                    `Could not start the ${integrationType} authorization flow.`
-            );
+            setNotice({
+                message:
+                    e?.response?.data?.detail ||
+                    `Could not start the ${integrationType} authorization flow.`,
+                severity: 'error',
+            });
         }
     };
 
@@ -119,34 +130,61 @@ export const IntegrationConnect = ({
     useEffect(() => clearPollTimer, [clearPollTimer]);
 
     return (
-        <Box sx={{ mt: 2 }}>
-            Parameters
-            <Box
-                display="flex"
-                alignItems="center"
-                justifyContent="center"
-                sx={{ mt: 2 }}
-            >
+        <Box>
+            <Box display="flex" alignItems="center" gap={2} flexWrap="wrap">
                 <Button
                     variant="contained"
                     onClick={isConnected ? () => {} : handleConnectClick}
-                    color={isConnected ? 'success' : 'primary'}
                     disabled={isConnecting}
-                    style={{
+                    startIcon={isConnected ? <CheckCircleRoundedIcon /> : null}
+                    sx={{
                         pointerEvents: isConnected ? 'none' : 'auto',
                         cursor: isConnected ? 'default' : 'pointer',
-                        opacity: isConnected ? 1 : undefined,
+                        bgcolor: isConnected ? 'success.main' : meta.color,
+                        color: '#fff',
+                        '&:hover': {
+                            bgcolor: isConnected ? 'success.dark' : meta.color,
+                            filter: isConnected ? undefined : 'brightness(0.92)',
+                        },
+                        '&.Mui-disabled': {
+                            bgcolor: meta.color,
+                            opacity: 0.6,
+                            color: '#fff',
+                        },
                     }}
                 >
-                    {isConnected ? (
+                    {isConnecting ? (
+                        <CircularProgress size={20} sx={{ color: '#fff' }} />
+                    ) : isConnected ? (
                         `${integrationType} Connected`
-                    ) : isConnecting ? (
-                        <CircularProgress size={20} />
                     ) : (
                         `Connect to ${integrationType}`
                     )}
                 </Button>
+                {isConnected && (
+                    <Typography variant="body2" color="text.secondary">
+                        Authorized — continue when you're ready.
+                    </Typography>
+                )}
             </Box>
+
+            <Snackbar
+                open={Boolean(notice)}
+                autoHideDuration={5000}
+                onClose={() => setNotice(null)}
+                anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+            >
+                {notice && (
+                    <Alert
+                        severity={notice.severity}
+                        variant="filled"
+                        onClose={() => setNotice(null)}
+                        sx={{ width: '100%' }}
+                    >
+                        {notice.message}
+                    </Alert>
+                )}
+            </Snackbar>
         </Box>
     );
 };
