@@ -59,17 +59,18 @@ real HubSpot Client ID/Secret (see README "Create a HubSpot app").
 
 1. **(0:00–0:10) Open http://localhost:3000.**
    Say: *"This is the integrations app with HubSpot added alongside the existing
-   Airtable and Notion integrations."*
-   Fill in User / Organization, open the Integration Type dropdown to show **HubSpot**
-   is a selectable option next to Airtable/Notion.
+   Airtable and Notion integrations, walked through as a 3-step flow."*
+   Fill in User / Organization, click **Continue**.
 
-2. **(0:10–0:35) Select HubSpot, click "Connect to HubSpot."**
+2. **(0:10–0:35) Step 2 shows the provider cards — click the HubSpot card, then
+   "Connect to HubSpot."**
    Say: *"This calls authorize_hubspot on the backend, which builds a HubSpot consent
    URL with a CSRF state and PKCE challenge, and opens it in a popup."*
    Let HubSpot's real consent screen load, click **Allow/Install**. Point out the
-   popup closing itself and the button flipping to **"HubSpot Connected"**.
+   popup closing itself and the button flipping to **"HubSpot Connected."**
    Say: *"The popup closing triggers the frontend to call oauth2callback's result via
    the /credentials endpoint, which pops the tokens out of Redis."*
+   Click **Continue** to advance to step 3.
 
 3. **(0:35–1:05) Click "Load Data."**
    Say: *"This calls get_items_hubspot, which fetches contacts, companies, and deals
