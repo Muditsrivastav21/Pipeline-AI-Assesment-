@@ -2,46 +2,60 @@
 
 ## System Overview
 
+```mermaid
+flowchart TB
+    Browser["Browser (React + MUI)<br/>3-step stepper: details → connect → load"]
+
+    Backend["FastAPI Backend :8000<br/>authorize_&#123;type&#125; · oauth2callback_&#123;type&#125;<br/>get_&#123;type&#125;_credentials · get_items_&#123;type&#125;"]
+
+    Redis[("Redis<br/>sessions + tokens<br/>short TTL, single-use")]
+    HubSpot["HubSpot API"]
+    Airtable["Airtable API"]
+    Notion["Notion API"]
+
+    Browser <-->|"OAuth redirect, load data"| Backend
+    Backend <--> Redis
+    Backend <--> HubSpot
+    Backend <--> Airtable
+    Backend <--> Notion
 ```
-┌─────────────────────────────────────────────────────────────────┐
-│                      Browser (React + MUI)                      │
-│  3-step stepper: Your details → Connect provider → Load data    │
-└────────────────────────┬────────────────────────────────────────┘
-                         │
-                         │ OAuth redirect, load data
-                         │
-         ┌───────────────▼────────────────┐
-         │   FastAPI Backend (8000)       │
-         │  - authorize_{type}            │
-         │  - oauth2callback_{type}       │
-         │  - get_{type}_credentials      │
-         │  - get_items_{type}            │
-         │                                │
-         │  Supports: HubSpot, Airtable,  │
-         │  Notion (same pattern)         │
-         └───────────────┬────────────────┘
-                         │
-         ┌───────────────┼───────────────┐
-         │               │               │
-    ┌────▼───────┐ ┌────▼──────┐ ┌─────▼────────┐
-    │   Redis    │ │  HubSpot  │ │   Airtable   │
-    │ (sessions, │ │    API    │ │      API     │
-    │  tokens)   │ │           │ └──────────────┘
-    └────────────┘ └────┬──────┘
-                        │
-                    ┌───▼────────┐
-                    │   Notion   │
-                    │    API     │
-                    └────────────┘
-```
+
+All three integrations (HubSpot, Airtable, Notion) follow the identical
+`authorize → callback → credentials → load` contract, so the frontend and
+backend routing are shared — only the provider-specific API calls differ.
 
 ## OAuth 2.0 Flow (PKCE)
 
-1. **authorize_hubspot()** — Generate state + PKCE code_challenge, store in Redis (TTL: 10min), redirect to HubSpot consent URL
-2. **User approves** on HubSpot's OAuth screen
-3. **oauth2callback_hubspot()** — HubSpot redirects back with code & state; verify state (CSRF check), exchange code for tokens via PKCE, cache tokens in Redis (single-use)
-4. **Frontend retrieves tokens** via get_hubspot_credentials() — tokens are deleted from Redis after retrieval (single-use prevents leakage)
-5. **get_items_hubspot()** — Fetch contacts, companies, deals concurrently (asyncio.gather), paginate each, map to IntegrationItem objects
+```mermaid
+sequenceDiagram
+    participant U as User
+    participant F as Frontend
+    participant P as OAuth Popup
+    participant B as Backend
+    participant R as Redis
+    participant H as HubSpot
+
+    U->>F: Click "Connect to HubSpot"
+    F->>B: POST /authorize
+    B->>B: generate state + PKCE code_challenge
+    B->>R: store state + verifier (TTL 10min)
+    B-->>F: consent URL
+    F->>P: open popup
+    P->>H: GET /oauth/authorize
+    H-->>U: consent screen
+    U->>H: Approve
+    H->>P: redirect ?code&state
+    P->>B: GET /oauth2callback
+    B->>R: verify state (CSRF check)
+    B->>H: POST /oauth/v1/token (code + verifier)
+    H-->>B: access_token, refresh_token
+    B->>R: cache tokens (single-use)
+    B-->>P: close popup
+    F->>B: POST /credentials
+    B->>R: GET + DELETE tokens
+    B-->>F: credentials JSON
+    F->>F: show "Connected"
+```
 
 **Key decisions:**
 - PKCE (RFC 7636) protects against token interception; backwards compatible with legacy HubSpot apps
@@ -51,16 +65,17 @@
 
 ## Data Loading
 
-**Concurrent fetch of three CRM object types:**
+**Concurrent fetch of three CRM object types (`asyncio.gather`):**
 
-```
-GET /integrations/hubspot/load
-  ├─ Fetch hub_id (for deep links)
-  ├─ Fetch contacts + paginate (cursor-based, max 10 pages)
-  ├─ Fetch companies + paginate
-  └─ Fetch deals + paginate
-
-All run in parallel via asyncio.gather()
+```mermaid
+flowchart LR
+    Load["POST /integrations/hubspot/load"]
+    Load --> HubId["fetch hub_id<br/>(for deep links)"]
+    Load --> Contacts["fetch contacts<br/>paginate, max 10 pages"]
+    Load --> Companies["fetch companies<br/>paginate, max 10 pages"]
+    Load --> Deals["fetch deals<br/>paginate, max 10 pages"]
+    HubId & Contacts & Companies & Deals --> Merge["map to IntegrationItem[]"]
+    Merge --> Table["render as table"]
 ```
 
 **Error handling:**
